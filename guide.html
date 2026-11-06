@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN" data-app-version="images-15">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>首尔百事通</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%2324ab8b'/%3E%3Cpath d='M12 31V11h16v20m-16 0h16m-5-10h1' stroke='%230b392d' fill='none' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./guide.css?v=images-15">
+  <script defer src="./site.js?v=images-15"></script>
+  <script defer src="./guide-data.js"></script>
+  <script defer src="./guide-ocr.js"></script>
+  <script defer src="./guide.js?v=images-15"></script>
+</head>
+<body class="guide-page">
+  <main aria-labelledby="guide-title">
+    <header class="guide-topbar">
+      <div class="guide-brand">
+        <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M30 17c0 8-10 17-10 17S10 25 10 17a10 10 0 1 1 20 0Z" stroke="currentColor" stroke-width="2.7"/><circle cx="20" cy="17" r="3.6" stroke="currentColor" stroke-width="2.7"/></svg>
+        <h1 id="guide-title">首尔百事通</h1>
+      </div>
+      <a class="guide-home-link" href="./"><span aria-hidden="true">←</span> 营业指南</a>
+    </header>
+    <section class="guide-search-area" aria-label="搜索首尔攻略">
+      <p class="guide-intro">搜索店铺、商圈与出行信息</p>
+      <form class="guide-form" id="guide-search" role="search">
+        <div class="guide-destination"><span>目的地</span><strong>首尔，韩国</strong></div>
+        <label for="guide-query"><span>你想了解什么？</span>
+          <input id="guide-query" type="search" placeholder="试试 T1网吧、弘大、气候卡" aria-label="搜索攻略关键词" required>
+        </label>
+        <button type="submit" aria-label="搜索">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </form>
+      <div class="guide-shortcuts" aria-label="快捷搜索">
+        <button type="button" data-query="圣水洞">圣水洞</button>
+        <button type="button" data-query="弘大">弘大</button>
+        <button type="button" data-query="明洞">明洞</button>
+        <button type="button" data-query="江南">江南</button>
+        <button type="button" data-query="气候卡">气候卡</button>
+        <button type="button" data-query="退税">退税</button>
+      </div>
+    </section>
+    <div class="guide-results-heading"><h2 id="guide-results-title">攻略里的店与去处</h2><span id="guide-result-count"></span></div>
+    <p id="guide-summary" role="status" hidden></p>
+    <div id="guide-results"></div>
+    <button id="guide-more" type="button" hidden>显示更多结果</button>
+    <footer class="guide-tools">
+      <p id="offline" role="status">正在准备离线使用…</p>
+      <div id="guide-download" class="guide-download" hidden>
+        <button id="guide-save-images" type="button">保存全部攻略图片到离线</button>
+        <p id="guide-download-status" role="status"></p>
+      </div>
+    </footer>
+  </main>
+</body>
+</html>
