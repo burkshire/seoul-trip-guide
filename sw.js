@@ -2,18 +2,22 @@ const scope = new URL(self.registration.scope);
 const entry = new URL('index.html', scope);
 const cachePrefix = `korea-trip:${scope.href}:`;
 // Bump the release when the HTML, store data, or bundled assets change.
-const cacheName = `${cachePrefix}v20`;
+const cacheName = `${cachePrefix}v21`;
 const imageCache = `korea-guide-media:${scope.href}:v1`;
-const offlineFiles = ['index.html', 'guide.html', 'guide.css', 'site.js', 'style.css', 'stores.js', 'app.js', 'app.js?v=home-17', 'seoul.svg', 'guide-data.js', 'guide-ocr.js', 'guide.js', 'site.js?v=images-15', 'guide.js?v=images-15', 'guide.css?v=images-15'].map((file) => new URL(file, scope).href);
+const offlineFiles = ['index.html', 'guide.html', 'guide.css', 'site.js', 'style.css', 'stores.js', 'app.js', 'app.js?v=home-17', 'seoul.svg', 'site.js?v=images-15', 'guide.css?v=images-15'].map((file) => new URL(file, scope).href);
 
 // Static hosts can redirect .html URLs to clean paths. A fresh Response removes
 // the redirected flag so Safari and Chromium can use it for offline navigation.
 function navigationResponse(response) {
-  return response.redirected ? new Response(response.body, {
+  const headers = new Headers(response.headers);
+  // Fetch already decoded the body; these describe the wire representation.
+  headers.delete('content-encoding');
+  headers.delete('content-length');
+  return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
-    headers: response.headers,
-  }) : response;
+    headers,
+  });
 }
 
 self.addEventListener('install', (event) => {
@@ -69,14 +73,17 @@ self.addEventListener('fetch', (event) => {
   if (request.mode === 'navigate' &&
       documentUrl) {
     event.respondWith((async () => {
+      // HTML and its search data are installed together. Use that complete
+      // release immediately instead of waiting for another mobile connection.
+      const cached = await caches.match(documentUrl, { cacheName });
+      if (cached) return navigationResponse(cached);
       try {
-        const response = await fetch(request);
+        const response = await fetch(new Request(documentUrl, { redirect: 'follow' }));
         if (response.ok) return navigationResponse(response);
       } catch {
         // The installed release remains available when the network fails.
       }
-      const cached = await caches.match(documentUrl, { cacheName });
-      return cached ? navigationResponse(cached) : Response.error();
+      return Response.error();
     })());
     return;
   }

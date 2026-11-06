@@ -268,4 +268,10 @@ const featuredIds = [4136, 1973, 2110, 1378, 647, 3340];
 const featured = featuredIds.map((id) => guideIndex.find(({ record }) => record.id === id)).filter(Boolean);
 guideResults.append(...featured.map(({ record }, index) =>
   guideCard({ record, rank: 0, related: false }, index, true)));
+document.documentElement.dataset.guideReady = 'true';
+for (const control of document.querySelectorAll('#guide-search input, #guide-search button, [data-query]')) {
+  control.disabled = false;
+}
+if ($('guide-load-state')) $('guide-load-state').hidden = true;
+if ($('guide-load-retry')) $('guide-load-retry').hidden = true;
 $('guide-result-count').textContent = featured.length + ' 个条目';
