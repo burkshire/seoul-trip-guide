@@ -34,11 +34,8 @@ main { width: min(100%, 660px); margin: auto; padding: 26px 16px 28px; }
   .hero h1 { font-size: 1.95rem; }
 }
 @media (prefers-reduced-motion: no-preference) {
-  @view-transition { navigation: auto; }
-  ::view-transition-old(root), ::view-transition-new(root) {
-    animation-duration: 240ms;
-    animation-timing-function: ease-in-out;
-  }
+  body { animation: page-arrive 240ms ease-in-out; }
+  @keyframes page-arrive { from { opacity: 0; } to { opacity: 1; } }
 }
 
 .eyebrow { display: flex; align-items: center; gap: 8px; font-size: .69rem; letter-spacing: .14em; font-weight: 760; }

@@ -2,7 +2,7 @@ const scope = new URL(self.registration.scope);
 const entry = new URL('index.html', scope);
 const cachePrefix = `korea-trip:${scope.href}:`;
 // Bump the release when the HTML, store data, or bundled assets change.
-const cacheName = `${cachePrefix}v21`;
+const cacheName = `${cachePrefix}v22`;
 const imageCache = `korea-guide-media:${scope.href}:v1`;
 const offlineFiles = ['index.html', 'guide.html', 'guide.css', 'site.js', 'style.css', 'stores.js', 'app.js', 'app.js?v=home-17', 'seoul.svg', 'site.js?v=images-15', 'guide.css?v=images-15'].map((file) => new URL(file, scope).href);
 
