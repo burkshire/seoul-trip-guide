@@ -1,0 +1,68 @@
+name: Publish Seoul guide
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - name: Prepare offline website
+        shell: python
+        run: |
+          from pathlib import Path
+          import shutil
+          import zipfile
+          import urllib.request
+          import time
+          from concurrent.futures import ThreadPoolExecutor
+          output = Path("_site")
+          output.mkdir()
+          for file in Path(".").iterdir():
+              if file.suffix in {".html", ".css", ".js", ".svg"}:
+                  shutil.copy2(file, output / file.name)
+          for archive in sorted(Path(".").glob("guide-images-*.zip")):
+              with zipfile.ZipFile(archive) as images:
+                  images.extractall(output)
+          media = output / "guide-media"
+          media.mkdir(exist_ok=True)
+          def restore_image(number):
+              name = f"{number:03}.webp"
+              destination = media / name
+              if destination.exists():
+                  return
+              for attempt in range(4):
+                  try:
+                      request = urllib.request.Request(
+                          "https://seoul-open-guide.burkshire30.chatgpt.site/guide-media/" + name,
+                          headers={"User-Agent": "SeoulGuide-Publisher"})
+                      with urllib.request.urlopen(request, timeout=30) as response:
+                          data = response.read()
+                      assert data[:4] == b"RIFF" and data[8:12] == b"WEBP", name
+                      destination.write_bytes(data)
+                      return
+                  except Exception:
+                      if attempt == 3:
+                          raise
+                      time.sleep(2 ** attempt)
+          with ThreadPoolExecutor(max_workers=8) as pool:
+              list(pool.map(restore_image, range(1, 746)))
+          assert len(list(media.glob("*.webp"))) == 745
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Deploy website
+        id: deployment
+        uses: actions/deploy-pages@v5
