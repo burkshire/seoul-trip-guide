@@ -2,14 +2,28 @@ const scope = new URL(self.registration.scope);
 const entry = new URL('index.html', scope);
 const cachePrefix = `korea-trip:${scope.href}:`;
 // Bump the release when the HTML, store data, or bundled assets change.
-const cacheName = `${cachePrefix}v19`;
+const cacheName = `${cachePrefix}v20`;
 const imageCache = `korea-guide-media:${scope.href}:v1`;
 const offlineFiles = ['index.html', 'guide.html', 'guide.css', 'site.js', 'style.css', 'stores.js', 'app.js', 'app.js?v=home-17', 'seoul.svg', 'guide-data.js', 'guide-ocr.js', 'guide.js', 'site.js?v=images-15', 'guide.js?v=images-15', 'guide.css?v=images-15'].map((file) => new URL(file, scope).href);
+
+// Static hosts can redirect .html URLs to clean paths. A fresh Response removes
+// the redirected flag so Safari and Chromium can use it for offline navigation.
+function navigationResponse(response) {
+  return response.redirected ? new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  }) : response;
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(cacheName);
-    await cache.addAll(offlineFiles.map((url) => new Request(url, { cache: 'reload' })));
+    await Promise.all(offlineFiles.map(async (url) => {
+      const response = await fetch(new Request(url, { cache: 'reload' }));
+      if (!response.ok) throw new Error('Unable to cache ' + url);
+      await cache.put(url, navigationResponse(response));
+    }));
     const media = await caches.open(imageCache);
     const coverNames = ['626.webp', '395.webp', '411.webp', '321.webp', '088.webp', '532.webp'];
     await Promise.all(coverNames.map(async (name) => {
@@ -48,17 +62,21 @@ self.addEventListener('fetch', (event) => {
     })());
     return;
   }
-  const documentUrl = pathname === scope.pathname ? entry.href : new URL(pathname, scope).href;
+  const relativePath = pathname.slice(scope.pathname.length);
+  const documentUrl = ['', 'index', 'index.html'].includes(relativePath) ? entry.href
+    : ['guide', 'guide.html'].includes(relativePath) ? new URL('guide.html', scope).href
+    : null;
   if (request.mode === 'navigate' &&
-      [entry.href, new URL('guide.html', scope).href].includes(documentUrl)) {
+      documentUrl) {
     event.respondWith((async () => {
       try {
         const response = await fetch(request);
-        if (response.ok) return response;
+        if (response.ok) return navigationResponse(response);
       } catch {
         // The installed release remains available when the network fails.
       }
-      return await caches.match(documentUrl, { cacheName }) || Response.error();
+      const cached = await caches.match(documentUrl, { cacheName });
+      return cached ? navigationResponse(cached) : Response.error();
     })());
     return;
   }
