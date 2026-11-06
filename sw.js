@@ -2,9 +2,9 @@ const scope = new URL(self.registration.scope);
 const entry = new URL('index.html', scope);
 const cachePrefix = `korea-trip:${scope.href}:`;
 // Bump the release when the HTML, store data, or bundled assets change.
-const cacheName = `${cachePrefix}v22`;
+const cacheName = `${cachePrefix}v23`;
 const imageCache = `korea-guide-media:${scope.href}:v1`;
-const offlineFiles = ['index.html', 'guide.html', 'guide.css', 'site.js', 'style.css', 'stores.js', 'app.js', 'app.js?v=home-17', 'seoul.svg', 'site.js?v=images-15', 'guide.css?v=images-15'].map((file) => new URL(file, scope).href);
+const offlineFiles = ['index.html', 'guide-mobile.html', 'style.css', 'stores.js', 'app.js?v=home-17', 'seoul.svg', 'site.js?v=images-15'].map((file) => new URL(file, scope).href);
 
 // Static hosts can redirect .html URLs to clean paths. A fresh Response removes
 // the redirected flag so Safari and Chromium can use it for offline navigation.
@@ -68,7 +68,7 @@ self.addEventListener('fetch', (event) => {
   }
   const relativePath = pathname.slice(scope.pathname.length);
   const documentUrl = ['', 'index', 'index.html'].includes(relativePath) ? entry.href
-    : ['guide', 'guide.html'].includes(relativePath) ? new URL('guide.html', scope).href
+    : ['guide', 'guide.html', 'guide-mobile', 'guide-mobile.html'].includes(relativePath) ? new URL('guide-mobile.html', scope).href
     : null;
   if (request.mode === 'navigate' &&
       documentUrl) {
